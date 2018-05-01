@@ -1,0 +1,54 @@
+yum install perl net-tools wget ping telnet ntpdate yum-utils epel-release traceroute -y
+# yum install acpid
+# systemctl enable acpid
+
+
+Completely disable Selinux policy on the machine by issuing the below commands. 
+Also edit  /etc/selinux/config file and set SELINUX line from enforcing to permissive
+setenforce 0
+getenforce
+vi /etc/selinux/config
+SELINUX=permissive
+
+
+systemctl stop postfix firewalld NetworkManager
+systemctl disable postfix firewalld NetworkManager
+systemctl mask NetworkManager
+yum remove postfix NetworkManager NetworkManager-libnm -y
+
+systemctl enable network
+systemctl start network
+
+
+rm -f /etc/udev/rules.d/70-persistent-net.rules
+
+In order for the OpenStack Instance to communicate with the metadata service turn off network zero configuration:
+
+echo "NOZEROCONF=yes" >> /etc/sysconfig/network
+
+Edit the /etc/default/grub file and configure the GRUB_CMDLINE_LINUX option. Delete the rhgb quiet and add console=tty0 console=ttyS0,115200n8 to the option.
+GRUB_CMDLINE_LINUX="crashkernel=auto rd.lvm.lv=cl/root rd.lvm.lv=cl/swap console=tty0 console=ttyS0,115200n8"
+
+grub2-mkconfig -o /boot/grub2/grub.cfg
+
+virt-sysprep -d centos
+
+virsh undefine centos
+
+
+yum install -y cloud-init cloud-utils cloud-utils-growpart rlwrap 
+
+
+vi /etc/cloud/cloud.cfg
+
+
+yum check-update
+yum update -y
+
+yum clean all
+
+rm -rf /tmp/*
+
+rm -f /var/log/wtmp /var/log/btmp
+
+history -c
